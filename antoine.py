@@ -51,16 +51,18 @@ SUSTANCIAS = {
 
 
 
-def calcular_temperatura_burbuja(controles_dinamicos, presion_sistema):
-    
+def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones: dict):
+    xd = composiciones.get("Xd", [])
+    xw = composiciones.get("Xw", [])
+
     T = symbols("T")
     sustancias_seleccionadas = [i["dropdown"].value for i in controles_dinamicos]
-    composiciones = [float(i["composicion"].value) for i in controles_dinamicos]       
+    
     A=[SUSTANCIAS[sustancia]["A"] for sustancia in sustancias_seleccionadas]
     B=[SUSTANCIAS[sustancia]["B"] for sustancia in sustancias_seleccionadas]
     C=[SUSTANCIAS[sustancia]["C"] for sustancia in sustancias_seleccionadas]
-    suma_presiones_burbuja = (1/presion_sistema)*sum([composiciones[i] * ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
-    suma_presiones_rocio = presion_sistema*sum([composiciones[i] /ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
+    suma_presiones_burbuja = (1/presion_sistema)*sum([xd[i] * ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
+    suma_presiones_rocio = presion_sistema*sum([xw[i] /ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
     temperatura_burbuja_valor = encontrar_temperaturas(suma_presiones_burbuja, T)
     temperatura_rocio_valor = encontrar_temperaturas(suma_presiones_rocio, T)
 
@@ -71,16 +73,17 @@ def calcular_temperatura_burbuja(controles_dinamicos, presion_sistema):
     #Se mantiene igual
     for i in range(len(sustancias_seleccionadas)):
         constantes += f"Sustancia {i+1}: {sustancias_seleccionadas[i]}\n"
-        constantes += f"x{i+1} = {composiciones[i]}\n"
+        constantes += f"xd{i+1} = {xd[i]}\n"
+        constantes += f"xw{i+1} = {xw[i]}\n"
         constantes += f"A{i+1} = {A[i]}\n"
         constantes += f"B{i+1} = {B[i]}\n"
         constantes += f"C{i+1} = {C[i]}\n\n"
 
 
-        presiones_suma_burbuja += f"{composiciones[i]}*exp[{A[i]} - ({B[i]}/(T + {C[i]}))]/{presion_sistema}\n"
+        presiones_suma_burbuja += f"{xd[i]}*exp[{A[i]} - ({B[i]}/(T + {C[i]}))]/{presion_sistema}\n"
         presiones_suma_burbuja += " + " if i < len(sustancias_seleccionadas)-1 else ""
 
-        presiones_suma_rocio += f"[{presion_sistema}*{composiciones[i]}]/exp[{A[i]} - ({B[i]}/(T + {C[i]}))]\n"
+        presiones_suma_rocio += f"[{presion_sistema}*{xw[i]}]/exp[{A[i]} - ({B[i]}/(T + {C[i]}))]\n"
         presiones_suma_rocio += " + " if i < len(sustancias_seleccionadas)-1 else ""
 
 

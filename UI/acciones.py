@@ -1,6 +1,7 @@
 import flet as ft
 from UI.cuadro_texto import cuadro_texto
 from composiciones import texto_composiciones
+from antoine import calcular_temperatura_burbuja_rocio
 
 def limpiar_todo(e, elementos_UI, controles_dinamicos):
         """Accion para boton limpiar; limpia dropdown, controles dinamicos, area de entradas y area de resultados"""
@@ -64,12 +65,35 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones):
 
         composiciones= calcular_composiciones(controles_dinamicos)
         composiciones_texto=texto_composiciones(composiciones)
+        presion_sistema=float(elementos_UI["presion_sistema_tf"].value)
+        constantes,ecuacion_burbuja, ecuacion_rocio,resultado=calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones)
+
+
         elementos_UI["area_resultados"].controls.append(
                 cuadro_texto("CÁLCULO DE COMPOSICIONES", composiciones_texto))
         
-
-
         
+        elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Constantes", constantes)
+            )
+        
+        elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Ecuación de Burbuja", ecuacion_burbuja)
+            )
+        
+        elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Ecuación de Rocío", ecuacion_rocio)
+            )
+        
+        elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Resultados", resultado)
+            )
+
+
+        elementos_UI["area_resultados"].update()
+
+
+
         elementos_UI["area_resultados"].update()
 
 
