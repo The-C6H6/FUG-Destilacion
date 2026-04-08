@@ -1,95 +1,40 @@
+import math
 import flet as ft
+from antoine import calcular_temperatura_burbuja    
+from UI import (
+    crear_bloque_captura, 
+    estilo_cantidad_sustancias, 
+    estilo_boton_calcular, 
+    estilo_boton_limpiar, 
+    limpiar_todo, 
+    calcular_todo, 
+    crear_entradas, 
+    distribucion_pagina
+
+)
+
 
 def main(page: ft.Page):
-    page.title = "Tabla editable tipo Excel"
-    page.padding = 20
+    page.title = "Calculadora de presión de vapor"
+    page.window_width = 950
+    page.window_height = 850
     page.scroll = ft.ScrollMode.AUTO
+    page.padding = 20
+    controles_dinamicos = []    
 
-    filas = 5
-    columnas = 6
+    elementos_UI={
+        "area_entradas": ft.Column(spacing=12),
+        "area_resultados": ft.Column(spacing=12),
+        "cantidad_dropdown": estilo_cantidad_sustancias(lambda e: crear_entradas(e, controles_dinamicos, elementos_UI, crear_bloque_captura)),
+        "presion_sistema_tf": ft.TextField(label="Presión del sistema (kPa)", width=300, hint_text="Ejemplo: 101.325"),
+        "btn_calcular": estilo_boton_calcular(lambda e: calcular_todo(e, elementos_UI, controles_dinamicos, calcular_temperatura_burbuja)),
+        "btn_limpiar": estilo_boton_limpiar(lambda e: limpiar_todo(e, elementos_UI, controles_dinamicos))
+    }
 
-    headers = [f"Col {i+1}" for i in range(columnas)]
-
-    # matriz inicial
-    data = [[f"" for _ in range(columnas)] for _ in range(filas)]
-
-    # aquí guardamos referencias a cada celda
-    celdas = []
-
-    def crear_celda(valor=""):
-        tf = ft.TextField(
-            value=valor,
-            width=120,
-            height=42,
-            text_size=14,
-            content_padding=10,
-            border=ft.InputBorder.NONE,
-        )
-        return ft.Container(
-            content=tf,
-            border=ft.border.all(1, ft.Colors.GREY_400),
-            padding=0,
-        ), tf
-
-    def obtener_datos(e=None):
-        matriz = []
-        for fila in celdas:
-            matriz.append([celda.value for celda in fila])
-
-        resultado.value = str(matriz)
-        page.update()
-
-    # encabezados
-    fila_headers = ft.Row(
-        spacing=0,
-        controls=[
-            ft.Container(
-                content=ft.Text(h, weight=ft.FontWeight.BOLD),
-                width=120,
-                height=42,
-                alignment=ft.Alignment.CENTER,
-                bgcolor=ft.Colors.BLUE_100,
-                border=ft.border.all(1, ft.Colors.GREY_400),
-            )
-            for h in headers
-        ],
-    )
-
-    filas_ui = [fila_headers]
-
-    # celdas editables
-    for i in range(filas):
-        fila_refs = []
-        controles_fila = []
-        for j in range(columnas):
-            contenedor, tf = crear_celda(data[i][j])
-            fila_refs.append(tf)
-            controles_fila.append(contenedor)
-
-        celdas.append(fila_refs)
-        filas_ui.append(ft.Row(spacing=0, controls=controles_fila))
-
-    tabla = ft.Row(
-        scroll=ft.ScrollMode.AUTO,   # scroll horizontal
-        controls=[
-            ft.Column(
-                spacing=0,
-                controls=filas_ui,
-            )
-        ],
-    )
-
-    resultado = ft.Text(selectable=True)
 
     page.add(
-        ft.Text("Tabla editable n x m", size=22, weight=ft.FontWeight.BOLD),
-        tabla,
-        ft.Row(
-            controls=[
-                ft.ElevatedButton("Leer datos", on_click=obtener_datos),
-            ]
-        ),
-        resultado
+        distribucion_pagina(elementos_UI)
     )
 
-ft.run(main)
+
+ft.app(target=main)
