@@ -1,5 +1,6 @@
 import flet as ft
 from UI.cuadro_texto import cuadro_texto
+from composiciones import texto_composiciones
 
 def limpiar_todo(e, elementos_UI, controles_dinamicos):
         """Accion para boton limpiar; limpia dropdown, controles dinamicos, area de entradas y area de resultados"""
@@ -62,28 +63,13 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones):
         
 
         composiciones= calcular_composiciones(controles_dinamicos)
-        print(composiciones)
-        #constantes,ecuacion_burbuja, ecuacion_rocio, resultado
-        return
-
-
+        composiciones_texto=texto_composiciones(composiciones)
         elementos_UI["area_resultados"].controls.append(
-                cuadro_texto("Constantes", constantes)
-            )
+                cuadro_texto("CÁLCULO DE COMPOSICIONES", composiciones_texto))
         
-        elementos_UI["area_resultados"].controls.append(
-                cuadro_texto("Ecuación de Burbuja", ecuacion_burbuja)
-            )
-        
-        elementos_UI["area_resultados"].controls.append(
-                cuadro_texto("Ecuación de Rocío", ecuacion_rocio)
-            )
-        
-        elementos_UI["area_resultados"].controls.append(
-                cuadro_texto("Resultados", resultado)
-            )
 
 
+        
         elementos_UI["area_resultados"].update()
 
 
@@ -122,7 +108,7 @@ def validar_capturas(controles_dinamicos, presion_sistema=None):
         else:
             try:
                 alim_val = float(alimentacion.value)
-                if alim_val <= 0:
+                if alim_val < 0:
                     errores.append(f"Captura {i}: La Alimentación debe ser mayor a 0.")
             except ValueError:
                 errores.append(f"Captura {i}: La Alimentación debe ser un número válido.")
@@ -132,7 +118,7 @@ def validar_capturas(controles_dinamicos, presion_sistema=None):
         else:
             try:
                 desti_val = float(destilado.value)
-                if desti_val <= 0:
+                if desti_val < 0:
                     errores.append(f"Captura {i}: El Destilado debe ser mayor a 0.")
             except ValueError:
                 errores.append(f"Captura {i}: El Destilado debe ser un número válido.")
@@ -142,7 +128,7 @@ def validar_capturas(controles_dinamicos, presion_sistema=None):
         else:
             try:
                 waste_val = float(waste.value)
-                if waste_val <= 0:
+                if waste_val < 0:
                     errores.append(f"Captura {i}: El Waste debe ser mayor a 0.")
             except ValueError:
                 errores.append(f"Captura {i}: El Waste debe ser un número válido.")
