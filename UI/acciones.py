@@ -66,13 +66,13 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones):
         composiciones= calcular_composiciones(controles_dinamicos)
         composiciones_texto=texto_composiciones(composiciones)
         presion_sistema=float(elementos_UI["presion_sistema_tf"].value)
-        constantes,ecuacion_burbuja, ecuacion_rocio,resultado=calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones)
+        constantes,ecuacion_burbuja, ecuacion_rocio,resultado, ki_texto=calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones)
 
 
         elementos_UI["area_resultados"].controls.append(
                 cuadro_texto("CÁLCULO DE COMPOSICIONES", composiciones_texto))
         
-        
+
         elementos_UI["area_resultados"].controls.append(
                 cuadro_texto("Constantes", constantes)
             )
@@ -89,11 +89,9 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones):
                 cuadro_texto("Resultados", resultado)
             )
 
-
-        elementos_UI["area_resultados"].update()
-
-
-
+        elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Ki a temperatura de burbuja y rocio", ki_texto)
+            )
         elementos_UI["area_resultados"].update()
 
 

@@ -104,7 +104,34 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
     else:
         resultado += f"Temperatura de rocío: {float(temperatura_rocio_valor):.2f} °C\n"
 
-    return constantes,ecuacion_burbuja, ecuacion_rocio,resultado
+    tr = float(temperatura_rocio_valor)
+    tb = float(temperatura_burbuja_valor)
+
+    ki_w = []
+    ki_d = []
+
+    presiones_texto = "Cálculo de Ki a temperatura de burbuja y rocío\n\n"
+
+    for i in range(len(sustancias_seleccionadas)):
+        p_w = presiones_Antoine(tr, A[i], B[i], C[i])
+        kiw = p_w / presion_sistema
+        ki_w.append(kiw)
+
+        p_d = presiones_Antoine(tb, A[i], B[i], C[i])
+        kid = p_d / presion_sistema
+        ki_d.append(kid)
+
+
+        presiones_texto += (
+        f"{sustancias_seleccionadas[i]}:\n"
+        f"  P° a T rocío = exp({A[i]} - ({B[i]} / ({tr} + {C[i]}))) = {p_w:.4f} KPa\n"
+        f"  P° a T burbuja = exp({A[i]} - ({B[i]} / ({tb} + {C[i]}))) = {p_d:.4f} KPa\n"
+        f"  Ki a T rocío ({tr:.2f} °C) = {kiw:.6f} \n"
+        f"  Ki a T burbuja ({tb:.2f} °C) = {kid:.6f} \n\n"
+    )
+
+
+    return constantes,ecuacion_burbuja, ecuacion_rocio,resultado, presiones_texto
 
 
 
@@ -126,6 +153,7 @@ def encontrar_temperaturas(suma_presiones, T=symbols("T")):
 
 
 
-
+def presiones_Antoine(t:float, A:float, B:float, C:float):
+    return exp(A - (B / (t + C)))
 
 
