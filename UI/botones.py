@@ -1,9 +1,7 @@
 import flet as ft
   
-
-
 def estilo_boton_calcular(calcular_todo):
-    return ft.ElevatedButton(
+    return ft.Button(
         "Calcular",
         on_click=calcular_todo
     )

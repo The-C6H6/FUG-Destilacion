@@ -54,6 +54,7 @@ def crear_bloque_captura(indice, controles_dinamicos: list = []):
         controles_dinamicos.append(
             {
                 "dropdown": dd_sustancia,
+                "alimentacion":tf_alimentacion,
                 "destilado": tf_destilado,
                 "waste": tf_waste
             }
