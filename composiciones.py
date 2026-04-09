@@ -63,12 +63,15 @@ def calcular_composiciones(controles_dinamicos):
         "Zf": alimentado_individual,
         "Xd": destilado_individual,
         "Xw": waste_individual,
+        
         "indice_cl":indice_cl,
         "D_cl":D_cl,
         "W_cl":W_cl,
+
         "indice_cp":indice_cp,
         "W_cp":W_cp,
         "D_cp":D_cp,
+        
 
 
 

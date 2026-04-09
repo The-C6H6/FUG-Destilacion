@@ -125,8 +125,8 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
 
         presiones_texto += (
         f"{sustancias_seleccionadas[i]}:\n"
-        f"  P° a T rocío = exp({A[i]} - ({B[i]} / ({tr} + {C[i]}))) = {p_w:.4f} KPa\n"
-        f"  P° a T burbuja = exp({A[i]} - ({B[i]} / ({tb} + {C[i]}))) = {p_d:.4f} KPa\n"
+        f"  P° a T rocío = exp({A[i]} - ({B[i]} / ({tr:.4f} + {C[i]}))) = {p_w:.4f} KPa\n"
+        f"  P° a T burbuja = exp({A[i]} - ({B[i]} / ({tb:.4f} + {C[i]}))) = {p_d:.4f} KPa\n"
         f"  Ki a T rocío ({tr:.2f} °C) = {kiw:.6f} \n"
         f"  Ki a T burbuja ({tb:.2f} °C) = {kid:.6f} \n\n"
     )
@@ -139,9 +139,29 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
             f"={volatilidad_relativa[i]:.6f}\n\n"
                                      )
 
-    #return ki_w, ki_d
+    indice_cl=composiciones["indice_cl"]
+    indice_cp=composiciones["indice_cp"]
+    D_cl=float(controles_dinamicos[indice_cl]['destilado'].value)
+    D_cp=float(controles_dinamicos[indice_cp]['destilado'].value)
+    W_cl=float(controles_dinamicos[indice_cl]['waste'].value)
+    W_cp=float(controles_dinamicos[indice_cp]['waste'].value)
 
-    return constantes,ecuacion_burbuja, ecuacion_rocio,resultado, presiones_texto, volatilidad_relativa_texto
+    alfa_clcp=math.sqrt((ki_w[indice_cl]/ki_w[indice_cp])*(ki_d[indice_cl]/ki_d[indice_cp]))
+    NMET=math.log((D_cl/D_cp)*(W_cp/W_cl))/math.log(alfa_clcp)
+    
+    NMET_texto=(
+            f"Cálculo de Número Mínimo de Etapas Teóricas (NMET) \n\n"
+            f"COMPONENTE CLAVE LIGERO : {sustancias_seleccionadas[indice_cl]}\n"
+            f"COMPONENTE CLAVE PESADO : {sustancias_seleccionadas[indice_cp]}\n"
+            f"𝛼_(CL-CP,𝑝𝑟𝑜𝑚) = √(({ki_w[indice_cl]:.4f}/{ki_w[indice_cp]:.4f})*({ki_d[indice_cl]:.4f}/{ki_d[indice_cp]:.4f}))\n"
+            f"𝛼_(CL-CP,𝑝𝑟𝑜𝑚) = {alfa_clcp:.6f} \n"
+            f"NMET = LN((D_cl/D_cp)*(W_cp/W_cl))/𝛼_(CL-CP,𝑝𝑟𝑜𝑚)\n"
+            f"NMET = LN(({D_cl:.4f}/{D_cp:.4f})*({W_cp:.4f}/{W_cl:.4f}))/LN({alfa_clcp:.4f})\n"
+            f"NMET = {NMET:.6f}\n\n"
+                                     )
+
+
+    return constantes,ecuacion_burbuja, ecuacion_rocio,resultado, presiones_texto, volatilidad_relativa_texto, NMET_texto
 
 
 
