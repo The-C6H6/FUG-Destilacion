@@ -109,8 +109,9 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
 
     ki_w = []
     ki_d = []
-
+    volatilidad_relativa=[]
     presiones_texto = "Cálculo de Ki a temperatura de burbuja y rocío\n\n"
+    volatilidad_relativa_texto="Cálculo de Volatilidad Relativa promedio por componente\n𝛼_(𝑖𝑗,𝑝𝑟𝑜𝑚)=√((𝛼_𝑖𝑗@𝑡𝑑)(𝛼_𝑖𝑗@𝑡𝑤) )\n\n"
 
     for i in range(len(sustancias_seleccionadas)):
         p_w = presiones_Antoine(tr, A[i], B[i], C[i])
@@ -129,9 +130,18 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
         f"  Ki a T rocío ({tr:.2f} °C) = {kiw:.6f} \n"
         f"  Ki a T burbuja ({tb:.2f} °C) = {kid:.6f} \n\n"
     )
+        
+    for i in range(len(sustancias_seleccionadas)):
+        volatilidad_relativa.append(math.sqrt((ki_w[i]/ki_w[-1])*(ki_d[i]/ki_d[-1])))
+        volatilidad_relativa_texto+=(
+            f"Componente {i+1} : {sustancias_seleccionadas[i]}\n"
+            f"√(({ki_w[i]:.4f}/{ki_w[-1]:.4f})*({ki_d[i]:.4f}/{ki_d[-1]:.4f}))\n"
+            f"={volatilidad_relativa[i]:.6f}\n\n"
+                                     )
 
+    #return ki_w, ki_d
 
-    return constantes,ecuacion_burbuja, ecuacion_rocio,resultado, presiones_texto
+    return constantes,ecuacion_burbuja, ecuacion_rocio,resultado, presiones_texto, volatilidad_relativa_texto
 
 
 
