@@ -54,6 +54,8 @@ SUSTANCIAS = {
 def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones: dict):
     xd = composiciones.get("Xd", [])
     xw = composiciones.get("Xw", [])
+    indice_cl=composiciones["indice_cl"]
+    indice_cp=composiciones["indice_cp"]
 
     T = symbols("T")
     sustancias_seleccionadas = [i["dropdown"].value for i in controles_dinamicos]
@@ -61,15 +63,15 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
     A=[SUSTANCIAS[sustancia]["A"] for sustancia in sustancias_seleccionadas]
     B=[SUSTANCIAS[sustancia]["B"] for sustancia in sustancias_seleccionadas]
     C=[SUSTANCIAS[sustancia]["C"] for sustancia in sustancias_seleccionadas]
-    suma_presiones_burbuja = (1/presion_sistema)*sum([xd[i] * ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
-    suma_presiones_rocio = presion_sistema*sum([xw[i] /ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
-    temperatura_burbuja_valor = encontrar_temperaturas(suma_presiones_burbuja, T)
-    temperatura_rocio_valor = encontrar_temperaturas(suma_presiones_rocio, T)
+    suma_presiones_burbuja_destilado = (1/presion_sistema)*sum([xd[i] * ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
+    suma_presiones_burbuja_waste =     (1/presion_sistema)*sum([xw[i] * ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
+    temperatura_burbuja_valor_destilado = encontrar_temperaturas(suma_presiones_burbuja_destilado, T)
+    temperatura_burbuja_valor_waste = encontrar_temperaturas(suma_presiones_burbuja_waste, T)
 
     resultado = ""
     constantes = ""
-    presiones_suma_burbuja = ""
-    presiones_suma_rocio = ""
+    presiones_suma_burbuja_destilado = ""
+    presiones_suma_burbuja_waste = ""
     #Se mantiene igual
     for i in range(len(sustancias_seleccionadas)):
         constantes += f"Sustancia {i+1}: {sustancias_seleccionadas[i]}\n"
@@ -80,32 +82,32 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
         constantes += f"C{i+1} = {C[i]}\n\n"
 
 
-        presiones_suma_burbuja += f"{xd[i]}*exp[{A[i]} - ({B[i]}/(T + {C[i]}))]/{presion_sistema}\n"
-        presiones_suma_burbuja += " + " if i < len(sustancias_seleccionadas)-1 else ""
+        presiones_suma_burbuja_destilado += f"{xd[i]:.6f}*exp[{A[i]} - ({B[i]}/(T + {C[i]}))]/{presion_sistema}\n"
+        presiones_suma_burbuja_destilado += " + " if i < len(sustancias_seleccionadas)-1 else ""
 
-        presiones_suma_rocio += f"[{presion_sistema}*{xw[i]}]/exp[{A[i]} - ({B[i]}/(T + {C[i]}))]\n"
-        presiones_suma_rocio += " + " if i < len(sustancias_seleccionadas)-1 else ""
-
-
-    ecuacion_burbuja = "Ecuación final de burbuja:\n"
-    ecuacion_burbuja += f"{presiones_suma_burbuja} = 1\n\n\n"
-    ecuacion_rocio = "Ecuación final de rocio:\n"
-    ecuacion_rocio += f"{presiones_suma_rocio} = 1"
+        presiones_suma_burbuja_waste +=     f"{xw[i]:.6f}*exp[{A[i]} - ({B[i]}/(T + {C[i]}))]/{presion_sistema}\n"
+        presiones_suma_burbuja_waste += " + " if i < len(sustancias_seleccionadas)-1 else ""
 
 
+    ecuacion_burbuja_desti = "Ecuación final de burbuja Destilado:\n"
+    ecuacion_burbuja_desti += f"{presiones_suma_burbuja_destilado} = 1\n\n\n"
+    ecuacion_burbuja_waste = "Ecuación final de burbuja Waste:\n"
+    ecuacion_burbuja_waste += f"{presiones_suma_burbuja_waste} = 1"
 
-    if isinstance(temperatura_burbuja_valor, str):
-        resultado += f"{temperatura_burbuja_valor}\n"
+
+
+    if isinstance(temperatura_burbuja_valor_destilado, str):
+        resultado += f"{temperatura_burbuja_valor_destilado}\n"
     else:
-        resultado += f"Temperatura de burbuja: {float(temperatura_burbuja_valor):.2f} °C\n"
+        resultado += f"Temperatura de burbuja en Destilado: {float(temperatura_burbuja_valor_destilado):.2f} °C\n"
 
-    if isinstance(temperatura_rocio_valor, str):
-        resultado += f"{temperatura_rocio_valor}\n" 
+    if isinstance(temperatura_burbuja_valor_waste, str):
+        resultado += f"{temperatura_burbuja_valor_waste}\n" 
     else:
-        resultado += f"Temperatura de rocío: {float(temperatura_rocio_valor):.2f} °C\n"
+        resultado += f"Temperatura de burbuja en Waste: {float(temperatura_burbuja_valor_waste):.2f} °C\n"
 
-    tr = float(temperatura_rocio_valor)
-    tb = float(temperatura_burbuja_valor)
+    tb_waste = float(temperatura_burbuja_valor_waste)
+    tb_desti = float(temperatura_burbuja_valor_destilado)
 
     ki_w = []
     ki_d = []
@@ -114,33 +116,32 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
     volatilidad_relativa_texto="Cálculo de Volatilidad Relativa promedio por componente\n𝛼_(𝑖𝑗,𝑝𝑟𝑜𝑚)=√((𝛼_𝑖𝑗@𝑡𝑑)(𝛼_𝑖𝑗@𝑡𝑤) )\n\n"
 
     for i in range(len(sustancias_seleccionadas)):
-        p_w = presiones_Antoine(tr, A[i], B[i], C[i])
+        p_w = presiones_Antoine(tb_waste, A[i], B[i], C[i])
         kiw = p_w / presion_sistema
         ki_w.append(kiw)
 
-        p_d = presiones_Antoine(tb, A[i], B[i], C[i])
+        p_d = presiones_Antoine(tb_desti, A[i], B[i], C[i])
         kid = p_d / presion_sistema
         ki_d.append(kid)
 
 
         presiones_texto += (
         f"{sustancias_seleccionadas[i]}:\n"
-        f"  P° a T rocío = exp({A[i]} - ({B[i]} / ({tr:.4f} + {C[i]}))) = {p_w:.4f} KPa\n"
-        f"  P° a T burbuja = exp({A[i]} - ({B[i]} / ({tb:.4f} + {C[i]}))) = {p_d:.4f} KPa\n"
-        f"  Ki a T rocío ({tr:.2f} °C) = {kiw:.6f} \n"
-        f"  Ki a T burbuja ({tb:.2f} °C) = {kid:.6f} \n\n"
+        f"  P° a T Waste = exp({A[i]} - ({B[i]} / ({tb_waste:.4f} + {C[i]}))) = {p_w:.4f} KPa\n"
+        f"  P° a T Destilado = exp({A[i]} - ({B[i]} / ({tb_desti:.4f} + {C[i]}))) = {p_d:.4f} KPa\n"
+        f"  Ki a T Waste ({tb_waste:.2f} °C) = {kiw:.6f} \n"
+        f"  Ki a T Destilado ({tb_desti:.2f} °C) = {kid:.6f} \n\n"
     )
         
     for i in range(len(sustancias_seleccionadas)):
-        volatilidad_relativa.append(math.sqrt((ki_w[i]/ki_w[-1])*(ki_d[i]/ki_d[-1])))
+        volatilidad_relativa.append(math.sqrt((ki_w[i]/ki_w[indice_cp])*(ki_d[i]/ki_d[indice_cp])))
         volatilidad_relativa_texto+=(
             f"Componente {i+1} : {sustancias_seleccionadas[i]}\n"
-            f"√(({ki_w[i]:.4f}/{ki_w[-1]:.4f})*({ki_d[i]:.4f}/{ki_d[-1]:.4f}))\n"
+            f"√(({ki_w[i]:.4f}/{ki_w[indice_cp]:.4f})*({ki_d[i]:.4f}/{ki_d[indice_cp]:.4f}))\n"
             f"={volatilidad_relativa[i]:.6f}\n\n"
                                      )
 
-    indice_cl=composiciones["indice_cl"]
-    indice_cp=composiciones["indice_cp"]
+    
     D_cl=float(controles_dinamicos[indice_cl]['destilado'].value)
     D_cp=float(controles_dinamicos[indice_cp]['destilado'].value)
     W_cl=float(controles_dinamicos[indice_cl]['waste'].value)
@@ -161,7 +162,7 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
                                      )
 
 
-    return constantes,ecuacion_burbuja, ecuacion_rocio,resultado, presiones_texto, volatilidad_relativa_texto, NMET_texto
+    return constantes,ecuacion_burbuja_desti, ecuacion_burbuja_waste,resultado, presiones_texto, volatilidad_relativa_texto, NMET_texto
 
 
 

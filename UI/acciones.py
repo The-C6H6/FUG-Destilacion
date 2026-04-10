@@ -66,7 +66,7 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones):
         composiciones= calcular_composiciones(controles_dinamicos)
         composiciones_texto=texto_composiciones(composiciones)
         presion_sistema=float(elementos_UI["presion_sistema_tf"].value)
-        constantes,ecuacion_burbuja, ecuacion_rocio,resultado, ki_texto, volatilidad, nmet=calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones)
+        constantes,ecuacion_burbuja_desti, ecuacion_burbuja_waste,resultado, ki_texto, volatilidad, nmet=calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones)
         
 
         elementos_UI["area_resultados"].controls.append(
@@ -78,11 +78,11 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones):
             )
         
         elementos_UI["area_resultados"].controls.append(
-                cuadro_texto("Ecuación de Burbuja", ecuacion_burbuja)
+                cuadro_texto("Ecuación de Burbuja Destiado", ecuacion_burbuja_desti)
             )
         
         elementos_UI["area_resultados"].controls.append(
-                cuadro_texto("Ecuación de Rocío", ecuacion_rocio)
+                cuadro_texto("Ecuación de Burbuja Waste", ecuacion_burbuja_waste)
             )
         
         elementos_UI["area_resultados"].controls.append(
