@@ -57,8 +57,11 @@ def crear_bloque_captura(indice, controles_dinamicos: list = []):
                 "alimentacion":tf_alimentacion,
                 "destilado": tf_destilado,
                 "waste": tf_waste
+
             }
         )
+
+        
 
         return ft.Card(
             content=ft.Container(
@@ -79,3 +82,5 @@ def crear_bloque_captura(indice, controles_dinamicos: list = []):
                 ),
             )
         )
+
+

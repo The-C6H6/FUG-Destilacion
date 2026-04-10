@@ -51,9 +51,10 @@ SUSTANCIAS = {
 
 
 
-def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones: dict):
+def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones: dict, almacen_variables:dict):
     xd = composiciones.get("Xd", [])
     xw = composiciones.get("Xw", [])
+    zif= composiciones.get("Zf",[])
     indice_cl=composiciones["indice_cl"]
     indice_cp=composiciones["indice_cp"]
 
@@ -160,9 +161,24 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
             f"NMET = LN(({D_cl:.4f}/{D_cp:.4f})*({W_cp:.4f}/{W_cl:.4f}))/LN({alfa_clcp:.4f})\n"
             f"NMET = {NMET:.6f}\n\n"
                                      )
+    
+    Fi=float(controles_dinamicos[0]['alimentacion'].value)
+    alfa_i_cp=volatilidad_relativa[0]
+    Di=Fi*(alfa_i_cp**NMET)*(D_cp/W_cp)/(1+(alfa_i_cp**NMET)*(D_cp/W_cp))
+    Di_texto=(
+            f"Cálculo de la distribución de componentes No-Clave \n\n"
+            f"Di = Fi*(𝛼_(𝑖-CP)^NMET)*(D_cp/W_cp)/(1+(𝛼_(𝑖-CP)^NMET)*(D_cp/W_cp))\n"
+            f"Di = {Fi}*({alfa_i_cp:.4f}^{NMET:.4f})*({D_cp}/{W_cp})/(1+({alfa_i_cp:.4f}^{NMET:.4f})*({D_cp}/{W_cp}))\n"
+            f"Di = {Di:.6f}\n"
 
+    )
 
-    return constantes,ecuacion_burbuja_desti, ecuacion_burbuja_waste,resultado, presiones_texto, volatilidad_relativa_texto, NMET_texto
+    #Ecs de Underwood : Ultimos calculos - se deebe realizar en otra función 
+    almacen_variables["volatilidad_relativa"] = volatilidad_relativa
+    almacen_variables["zif"] = zif
+    almacen_variables["alfa_clcp"] = alfa_clcp
+
+    return constantes,ecuacion_burbuja_desti, ecuacion_burbuja_waste,resultado, presiones_texto, volatilidad_relativa_texto, NMET_texto, Di_texto
 
 
 
@@ -180,6 +196,8 @@ def encontrar_temperaturas(suma_presiones, T=symbols("T")):
     ecuacion = Eq(suma_presiones, 1)
     solucion = nsolve(ecuacion, (-270, 1000), solver="bisect")
     return solucion if solucion else "Solución no encontrada"
+
+
 
 
 

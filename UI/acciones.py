@@ -2,6 +2,8 @@ import flet as ft
 from UI.cuadro_texto import cuadro_texto
 from composiciones import texto_composiciones
 from antoine import calcular_temperatura_burbuja_rocio
+from ecs_uderwood import underwood, R_min
+
 
 def limpiar_todo(e, elementos_UI, controles_dinamicos):
         """Accion para boton limpiar; limpia dropdown, controles dinamicos, area de entradas y area de resultados"""
@@ -36,7 +38,7 @@ def crear_entradas(e, controles_dinamicos, elementos_UI, crear_bloque_captura):
         elementos_UI["area_entradas"].update()
         elementos_UI["area_resultados"].update()
 
-def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones):
+def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones, almacen_variables):
         """Accion para boton calcular; Calcula la presión de vapor para cada captura, validando que se hayan seleccionado sustancias y temperaturas válidas. Muestra errores específicos para cada captura si hay problemas."""
         elementos_UI["area_resultados"].controls.clear()
 
@@ -64,10 +66,15 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones):
         
 
         composiciones= calcular_composiciones(controles_dinamicos)
+        almacen_variables['Xid']=composiciones['Xd']
         composiciones_texto=texto_composiciones(composiciones)
         presion_sistema=float(elementos_UI["presion_sistema_tf"].value)
-        constantes,ecuacion_burbuja_desti, ecuacion_burbuja_waste,resultado, ki_texto, volatilidad, nmet=calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones)
+        constantes,ecuacion_burbuja_desti, ecuacion_burbuja_waste,resultado, ki_texto, volatilidad, nmet, Di=calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones, almacen_variables)
         
+        nuevos_elementos_UI=ft.Row([elementos_UI["q_textfield"], elementos_UI["boton_uderwood"]])
+       
+
+
 
         elementos_UI["area_resultados"].controls.append(
                 cuadro_texto("CÁLCULO DE COMPOSICIONES", composiciones_texto))
@@ -98,8 +105,77 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones):
         
         elementos_UI["area_resultados"].controls.append(
                 cuadro_texto("Número Mínimo de Etapas Teóricas (NMET)", nmet))
+        
+        elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Distribución de componentes No-Clave", Di))
+
+        elementos_UI["area_resultados"].controls.append(
+            nuevos_elementos_UI)
+
 
         elementos_UI["area_resultados"].update()
+
+
+
+
+
+
+def underwood_evento(e, almacen_variables, elementos_UI):
+    volatilidad_relativa=almacen_variables["volatilidad_relativa"]
+    zif=almacen_variables["zif"]
+    xid=almacen_variables["Xid"]
+    alfa_clcp=almacen_variables["alfa_clcp"]
+    q=elementos_UI["q_textfield"].value
+
+
+    
+    if q is None or str(q).strip() == "":
+        elementos_UI["area_resultados"].controls.append(
+            ft.Text("No se ha asignado valores a q", color=ft.Colors.RED)
+        )
+        elementos_UI["area_resultados"].update()
+        elementos_UI["area_resultados"].controls.pop()
+        return
+
+    try:
+        q = float(q)
+        if q <= 0:
+            elementos_UI["area_resultados"].controls.append(
+                ft.Text("El valor de q debe ser positivo", color=ft.Colors.RED)
+            )
+            elementos_UI["area_resultados"].update()
+            elementos_UI["area_resultados"].controls.pop()
+            return
+    except ValueError:
+        elementos_UI["area_resultados"].controls.append(
+            ft.Text("El valor de q debe ser un número válido.", color=ft.Colors.RED)
+        )
+        elementos_UI["area_resultados"].update()
+        elementos_UI["area_resultados"].controls.pop()
+        return
+    
+    
+    theta, valor_theta=underwood(volatilidad_relativa, zif, q, alfa_clcp)
+    elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Factor de Convergencia θ", theta))
+    elementos_UI["area_resultados"].update()
+
+
+
+    #Ultima parte Rmin
+    if isinstance(valor_theta, str):
+        return
+    else:
+        valor_theta=float(valor_theta)
+
+        rmin=R_min(valor_theta, volatilidad_relativa, xid)
+        elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Rmin", rmin))
+        elementos_UI["area_resultados"].update()
+        elementos_UI["area_resultados"].controls.pop()
+        elementos_UI["area_resultados"].controls.pop()
+
+
 
 def validar_capturas(controles_dinamicos, presion_sistema=None):
     """

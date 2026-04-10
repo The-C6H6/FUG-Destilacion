@@ -12,3 +12,10 @@ def estilo_boton_limpiar(limpiar_todo):
         on_click=limpiar_todo,
         
     )   
+
+
+def estilo_boton_underwood(calcular_todo):
+    return ft.Button(
+        "Calcular θ",
+        on_click=calcular_todo
+    )
