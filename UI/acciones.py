@@ -11,9 +11,13 @@ def limpiar_todo(e, elementos_UI, controles_dinamicos):
         controles_dinamicos.clear()
         elementos_UI["area_entradas"].controls.clear()
         elementos_UI["area_resultados"].controls.clear()
+        elementos_UI["area_resultados_Underwood"].controls.clear()
+
         elementos_UI["cantidad_dropdown"].update()
         elementos_UI["area_entradas"].update()
         elementos_UI["area_resultados"].update()
+        elementos_UI["area_resultados_Underwood"].update()
+
         controles_dinamicos = []
 
 def crear_entradas(e, controles_dinamicos, elementos_UI, crear_bloque_captura):
@@ -71,7 +75,7 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones, 
         presion_sistema=float(elementos_UI["presion_sistema_tf"].value)
         constantes,ecuacion_burbuja_desti, ecuacion_burbuja_waste,resultado, ki_texto, volatilidad, nmet, Di=calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, composiciones, almacen_variables)
         
-        nuevos_elementos_UI=ft.Row([elementos_UI["q_textfield"], elementos_UI["boton_uderwood"]])
+        nuevos_elementos_UI=ft.Column([elementos_UI["q_textfield"], elementos_UI["boton_uderwood"]])
        
 
 
@@ -97,7 +101,7 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_composiciones, 
             )
 
         elementos_UI["area_resultados"].controls.append(
-                cuadro_texto("Ki a temperatura de burbuja y rocio", ki_texto)
+                cuadro_texto("Ki a temperatura de burbuja en \nDestilado y Waste", ki_texto)
             )
         
         elementos_UI["area_resultados"].controls.append(
@@ -126,39 +130,38 @@ def underwood_evento(e, almacen_variables, elementos_UI):
     xid=almacen_variables["Xid"]
     alfa_clcp=almacen_variables["alfa_clcp"]
     q=elementos_UI["q_textfield"].value
-
+    elementos_UI["area_resultados_Underwood"].controls.clear()
 
     
     if q is None or str(q).strip() == "":
-        elementos_UI["area_resultados"].controls.append(
+        elementos_UI["area_resultados_Underwood"].controls.append(
             ft.Text("No se ha asignado valores a q", color=ft.Colors.RED)
         )
-        elementos_UI["area_resultados"].update()
-        elementos_UI["area_resultados"].controls.pop()
+        elementos_UI["area_resultados_Underwood"].update()
+        elementos_UI["area_resultados_Underwood"].controls.pop()
         return
 
     try:
         q = float(q)
         if q <= 0:
-            elementos_UI["area_resultados"].controls.append(
+            elementos_UI["area_resultados_Underwood"].controls.append(
                 ft.Text("El valor de q debe ser positivo", color=ft.Colors.RED)
             )
-            elementos_UI["area_resultados"].update()
-            elementos_UI["area_resultados"].controls.pop()
+            elementos_UI["area_resultados_Underwood"].update()
+
             return
     except ValueError:
-        elementos_UI["area_resultados"].controls.append(
+        elementos_UI["area_resultados_Underwood"].controls.append(
             ft.Text("El valor de q debe ser un número válido.", color=ft.Colors.RED)
         )
-        elementos_UI["area_resultados"].update()
-        elementos_UI["area_resultados"].controls.pop()
+        elementos_UI["area_resultados_Underwood"].update()
         return
     
     
     theta, valor_theta=underwood(volatilidad_relativa, zif, q, alfa_clcp)
-    elementos_UI["area_resultados"].controls.append(
+    elementos_UI["area_resultados_Underwood"].controls.append(
                 cuadro_texto("Factor de Convergencia θ", theta))
-    elementos_UI["area_resultados"].update()
+    elementos_UI["area_resultados_Underwood"].update()
 
 
 
@@ -169,11 +172,9 @@ def underwood_evento(e, almacen_variables, elementos_UI):
         valor_theta=float(valor_theta)
 
         rmin=R_min(valor_theta, volatilidad_relativa, xid)
-        elementos_UI["area_resultados"].controls.append(
+        elementos_UI["area_resultados_Underwood"].controls.append(
                 cuadro_texto("Rmin", rmin))
-        elementos_UI["area_resultados"].update()
-        elementos_UI["area_resultados"].controls.pop()
-        elementos_UI["area_resultados"].controls.pop()
+        elementos_UI["area_resultados_Underwood"].update()
 
 
 

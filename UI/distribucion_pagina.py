@@ -2,6 +2,7 @@ import flet as ft
 def distribucion_pagina(elementos_UI):
     return ft.Column(
             controls=[
+                ft.Container(height=100, width=100),
                 ft.Text(
                     "Cálculo Método Fenske-Underwood-Gilliland (FUG)",
                     size=24,
@@ -23,6 +24,10 @@ def distribucion_pagina(elementos_UI):
                     weight=ft.FontWeight.BOLD,
                 ),
                 elementos_UI["area_resultados"],
+                ft.Container(height=10, width=10),
+                elementos_UI["area_resultados_Underwood"],
+                ft.Container(height=100, width=100),
+
             ],
             spacing=15,
         )

@@ -113,7 +113,7 @@ def calcular_temperatura_burbuja_rocio(controles_dinamicos, presion_sistema, com
     ki_w = []
     ki_d = []
     volatilidad_relativa=[]
-    presiones_texto = "Cálculo de Ki a temperatura de burbuja y rocío\n\n"
+    presiones_texto = "Cálculo de Ki a temperatura de burbuja en Destilado y Waste\n\n"
     volatilidad_relativa_texto="Cálculo de Volatilidad Relativa promedio por componente\n𝛼_(𝑖𝑗,𝑝𝑟𝑜𝑚)=√((𝛼_𝑖𝑗@𝑡𝑑)(𝛼_𝑖𝑗@𝑡𝑤) )\n\n"
 
     for i in range(len(sustancias_seleccionadas)):
